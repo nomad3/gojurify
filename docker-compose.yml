@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   web:
@@ -10,33 +10,43 @@ services:
       - '8000:8000'
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgres://user:password@db:5432/mydb
-      - SECRET_KEY=your-secret-key
-      - DEBUG=False
+      - DATABASE_URL=${DATABASE_URL}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
 
   db:
     image: postgres:13
-    environment:
-      - POSTGRES_DB=mydb
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
     volumes:
-      - db_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
   n8n:
     image: n8nio/n8n
     restart: always
     ports:
       - '5678:5678'
+    env_file:
+      - .env
     environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=youruser
-      - N8N_BASIC_AUTH_PASSWORD=yourpassword
-      - N8N_HOST=localhost
-      - WEBHOOK_URL=http://localhost:5678/
-    depends_on:
-      - db
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+    volumes:
+      - n8n_data:/home/node/.n8n
 
 volumes:
-  db_data:
+  postgres_data:
+  n8n_data:
